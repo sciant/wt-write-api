@@ -93,7 +93,7 @@ module.exports.createHotel = async (req, res, next) => {
                     var price = req.body.ratePlans[rateKey]['privatePrices'][priceKey].toString();
                     var addr = priceKey;
                     var nonce = uuid.v4();
-                    var encrypted = ecies.encrypt(Buffer.from(addr_to_pub_key[addr].slice(2),"hex"), Buffer.from("asdasd","utf8"));
+                    var encrypted = ecies.encrypt(Buffer.from(addr_to_pub_key[addr].slice(2),"hex"), Buffer.from(price + " " + nonce,"utf8"));
                     req.body.ratePlans[rateKey]['privatePrices'][priceKey] = encrypted.toString("hex");
                 }
             }
