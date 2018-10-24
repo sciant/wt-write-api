@@ -1,4 +1,10 @@
 const _ = require('lodash');
+
+const path = require('path');
+const ecies = require("eth-ecies");
+const fs = require('fs');
+const uuid = require("uuid");
+
 const WTLibs = require('@windingtree/wt-js-libs');
 
 const { logger } = require('../config');
@@ -70,6 +76,8 @@ function _validateRequest (body, enforceRequired) {
  */
 module.exports.createHotel = async (req, res, next) => {
   try {
+    var addr_to_pub_key = fs.readFileSync(path.resolve(__dirname, '../config/companyPublicKeys.json'), 'utf8');
+    addr_to_pub_key = JSON.parse(addr_to_pub_key);
     const wt = WT.get();
     const account = req.account;
     // 1. Validate request payload.
@@ -77,6 +85,20 @@ module.exports.createHotel = async (req, res, next) => {
     // 2. Add `updatedAt` timestamps.
     _addTimestamps(req.body);
     // 3. Upload the actual data parts.
+    //console.log(req.body.ratePlans.)
+    for (var rateKey in req.body.ratePlans) {
+        if (req.body.ratePlans.hasOwnProperty(rateKey)) {
+            for (var priceKey in req.body.ratePlans[rateKey]['privatePrices']) {
+                if (req.body.ratePlans[rateKey]['privatePrices'].hasOwnProperty(priceKey)) {
+                    var price = req.body.ratePlans[rateKey]['privatePrices'][priceKey].toString();
+                    var addr = priceKey;
+                    var nonce = uuid.v4();
+                    var encrypted = ecies.encrypt(Buffer.from(addr_to_pub_key[addr].slice(2),"hex"), Buffer.from("asdasd","utf8"));
+                    req.body.ratePlans[rateKey]['privatePrices'][priceKey] = encrypted.toString("hex");
+                }
+            }
+        }
+    }
     let dataIndex = {},
       uploading = [];
     for (let field of WT.DATA_INDEX_FIELDS) {
@@ -110,6 +132,7 @@ module.exports.createHotel = async (req, res, next) => {
       address: address,
     });
   } catch (err) {
+    console.log(err);
     if (err instanceof ValidationError) {
       return next(new HttpValidationError('validationFailed', err.message));
     }

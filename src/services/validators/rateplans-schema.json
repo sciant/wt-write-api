@@ -88,6 +88,15 @@
         "format": "float",
         "description": "Base price for given room type for one night and one person."
       },
+      "privatePrices": {
+              "type": "object",
+              "description": "Private negotiated rates",
+              "type" : "object",
+                "additionalProperties" : {
+                  "type": "number",
+                  "format": "float"
+                }
+            },
       "modifiers": {
         "type": "array",
         "description": "List of price modifiers, i. e. discounts based on length of stay",
